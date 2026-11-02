@@ -38,6 +38,15 @@ MIP_HEADER = 12
 # First match wins, tested against the enemy's asset name.
 EMBLEMS = [
     (r"Velgar", "T_Icon_Velgar_Head"),
+    (r"BlackKnight", "T_Icon_Dark_Knight_Cowl"),
+    (r"Skelet|Zogre", "T_Icon_Spectral_Noggin"),
+    (r"Zombie", "T_Icon_Zombie_lootbag"),
+    (r"Fuzan|KotHaar|TokXil", "T_Icon_Imaru_Curse_Seal_Rage_nofx"),
+    (r"HellRat", "T_Icon_Rat_roast"),
+    (r"HellHound|Demon", "T_Icon_Demonic_Oil"),
+    (r"Goat", "T_Icon_Resources_Large_Animal_Horn"),
+    (r"Vulture", "T_Icon_Resource_Feathers"),
+    (r"Hookworm|Kalphite", "T_Icon_Resource_Abyssal_Spine"),
     (r"Spectral", "T_Icon_Spectral_Noggin"),
     (r"Imaru|Rotsworn", "T_Icon_Imaru_Head_Resized"),
     (r"Goblin", "T_Icon_Resources_Goblin_Pack"),
@@ -61,6 +70,7 @@ EMBLEMS = [
     (r"Guardian", "T_Icon_Resource_Vault_Core"),
     (r"Beast", "T_Icon_WitherHeart"),
     (r"Dummy", "T_Icon_Crrate"),
+    (r".", "T_Icon_WitherHeart"),  # anything else
 ]
 
 UI_ART = {

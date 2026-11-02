@@ -11,6 +11,9 @@ const [sock, manifest, output] = process.argv.slice(2);
 const paths = fs.readFileSync(manifest, 'utf8').split('\n').map((l) => l.split('\t')[0]);
 
 function toAsset(p) {
+  // Expansions are plugins, which the game mounts under their own name instead of /Game/.
+  const plugin = p.match(/RSDragonwilds\/Plugins\/GameFeatures\/([^/]+)\/Content\/(.+)\.uasset$/);
+  if (plugin) return { pkg: `/${plugin[1]}/${plugin[2]}`, name: plugin[2].split('/').pop() };
   const m = p.match(/RSDragonwilds\/Content\/(.+)\.uasset$/);
   if (!m) return null;
   const name = m[1].split('/').pop();
@@ -73,7 +76,7 @@ const rpc = (...a) =>
     // The display name lives in the matching BP_AI_*_Data asset, when there is one.
     const dataName = e.name.replace(/_Character$/, '_Data');
     const dataPkg = e.pkg.replace(/[^/]+$/, dataName);
-    const data = paths.includes(`RSDragonwilds/Content/${dataPkg.slice('/Game/'.length)}.uasset`) ? await rpc('load', `${dataPkg}.${dataName}`) : null;
+    const data = paths.some((p) => p.endsWith(`/${dataName}.uasset`)) ? await rpc('load', `${dataPkg}.${dataName}`) : null;
     const display = data && data.ok && data.result ? (await rpc('get', data.result.ptr, 'AIName')).result : null;
     outEnemies.push({ path: `${e.pkg}.${e.name}_C`, id: e.name, name: display || humanize(e.name), group: e.pkg.split('/').slice(-2, -1)[0] });
   }
