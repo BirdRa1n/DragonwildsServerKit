@@ -369,6 +369,8 @@ forward its port to the internet.** Choose one of these:
 
 Without step 4, every visitor seems to come from the same address, and 8 wrong passwords lock everyone out for 5 minutes.
 
+Skip step 3 only if you accept the login page being open to the whole internet. The panel links its scripts with a version, so a proxy's cache cannot hold back an update.
+
 After changing `config.json`, **on the server**:
 
 ```bash
