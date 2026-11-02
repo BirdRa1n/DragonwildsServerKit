@@ -108,12 +108,12 @@ The simulator has no game art unless you have extracted it to `panel/public/data
 
 | Script | What it does |
 |---|---|
-| `tools/deploy-panel.sh` | Publishes only the panel. Players stay connected. |
+| `tools/deploy-panel.sh` | Publishes only the panel. Players stay connected. With `--static`, updates only web files and game data, and the panel does not even restart. |
 | `tools/deploy.sh` | Builds and publishes everything. Restarts the game and disconnects players. |
 | `tools/dwk.js` | Sends one command to the module, for debugging. |
 | `tools/live-test.js` | Exercises teleport and revive on the first player online. It changes that character, so use it on a test server only. |
 
-To add a language, add its strings to `panel/public/i18n.js`. Names of items and creatures come from the game's data.
+To add a language, add its strings to `panel/public/i18n.js`, and its code to `LANGUAGES` in `tools/extract_names.py`. Names of items, creatures and skills are the game's own translations.
 
 ## License
 

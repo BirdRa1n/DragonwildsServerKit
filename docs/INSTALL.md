@@ -230,11 +230,19 @@ map written
 
 A few failed icons are normal: those items just show an empty slot.
 
+Then build the names of items, creatures and skills in each panel language, from the game's own translations:
+
+```bash
+python -I tools/extract_names.py "C:/Games/RuneScape Dragonwilds/RSDragonwilds/Content/Paks/RSDragonwilds-Windows" panel/public/data/catalog.json panel/public/data
+```
+
+Without this file, the panel shows those names in English. A few have no translation in the game, and stay in English.
+
 The extractor reads uncompressed, unencrypted containers. If it says `container is compressed or encrypted`,
 your client's files are packaged differently, and the panel will work without images until the reader is
 extended. Everything else still works.
 
-These images belong to Jagex. They stay in `panel/public/data`, which Git ignores. Do not publish them.
+These images and names belong to Jagex. They stay in `panel/public/data`, which Git ignores. Do not publish them.
 
 The game has no portraits of its creatures, so each one is shown with a related icon from the game, chosen in
 `EMBLEMS` in `tools/extract_assets.py`.
@@ -456,6 +464,12 @@ git pull
 
 ```bash
 DWK_SSH=root@your-server sh tools/deploy-panel.sh
+```
+
+**If only web files or game data changed**, not even panel logins end. Reload the page to see the changes:
+
+```bash
+DWK_SSH=root@your-server sh tools/deploy-panel.sh --static
 ```
 
 **If the module changed**, this restarts the game and disconnects players. Warn them first:
