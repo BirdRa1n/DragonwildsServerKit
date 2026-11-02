@@ -1,0 +1,7 @@
+EOSSDK {
+  global:
+    EOS_SessionModification_SetHostAddress;
+    EOS_Sessions_CreateSessionModification;
+    EOS_Sessions_UpdateSessionModification;
+  local: *;
+};
