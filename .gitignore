@@ -1,0 +1,18 @@
+# Tools and research
+.tools/
+.research/
+.claude/
+__pycache__/
+*.tgz
+
+# Build output
+mod/build/
+
+# Panel secrets and runtime data
+panel/config.json
+panel/initial-password.txt
+panel/data/
+node_modules/
+
+# Built from each user's copy of the game: this art belongs to Jagex and must not be shared
+panel/public/data/
