@@ -90,7 +90,7 @@ async function start() {
   if (!catalog.items.length) {
     const res = await fetch('data/catalog.json');
     if (res.ok) catalog = await res.json();
-    catalog.items = catalog.items.filter((i) => i.group !== 'Deprecated');
+    catalog.items = catalog.items.filter((i) => !['Deprecated', 'Depreciated'].includes(i.group));
     const namesRes = await fetch('data/names.json');
     if (namesRes.ok) names = await namesRes.json();
     buildCatalogPages();
@@ -385,12 +385,13 @@ const ITEM_CATS = [
   ['tomes', (i) => /Tome/.test(i.kind)],
   ['seeds', (i) => /Seed/.test(i.kind)],
   ['magic', (i) => i.group === 'Magic'],
-  ['materials', (i) => i.kind === 'ItemData' && !['Key', 'PostBoxes', 'Magic'].includes(i.group)],
-  ['quest', (i) => ['Key', 'PostBoxes'].includes(i.group) || i.kind === 'JournalItemData'],
+  // Whatever fits no other category: logs and fuels, ores, herbs, components and so on.
+  ['materials', (i) => !ITEM_CATS.some(([name, test]) => name !== 'all' && name !== 'materials' && test(i))],
+  ['quest', (i) => ['Key', 'PostBoxes', 'Quest'].includes(i.group) || i.kind === 'JournalItemData'],
 ];
 
-const BOSS = /Boss|Colossal|Velgar|DragonImaru|Thane/i;
-const ANIMAL = /Chicken|Cow|Deer|_Ram_|Sheep|Kebbit|Chinchompa|Falcon|Magpie|Raven|Dummy/i;
+const BOSS = /Boss|Colossal|Velgar|DragonImaru|DragonFuzan|Thane|Titan/i;
+const ANIMAL = /Chicken|Cow|Deer|_Ram_|Sheep|Goat|Kebbit|Chinchompa|Falcon|Magpie|Raven|Vulture|Dummy/i;
 const ENEMY_CATS = [
   ['all', () => true],
   ['monsters', (e) => !BOSS.test(e.id) && !ANIMAL.test(e.id)],
@@ -403,9 +404,22 @@ const filters = {
   enemy: { query: '', cat: 0 },
 };
 
+/** Lower case and without accents, so "pocao" finds "Poção". */
+const fold = (text) => String(text).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+// The game's names do not always use the everyday word: its wood is "Lenhas" and "Tábua" in Portuguese.
+const SEARCH_SYNONYMS = {
+  madeira: ['wood', 'lenha', 'tabua', 'plank', 'log'],
+  madera: ['wood', 'tronco', 'tablon', 'plank', 'log'],
+  wood: ['log', 'plank'],
+};
+
+/** Every word must appear somewhere, in any order: in either language, or in the asset's own name. */
 function matches(entry, query) {
-  const q = query.trim().toLowerCase();
-  return !q || nameOf(entry).toLowerCase().includes(q) || entry.name.toLowerCase().includes(q) || entry.id.toLowerCase().includes(q);
+  const haystack = fold(`${nameOf(entry)} ${entry.name} ${entry.id} ${entry.group || ''}`);
+  return fold(query).split(/\s+/).filter(Boolean).every((word) => (
+    [word, ...(SEARCH_SYNONYMS[word] || [])].some((term) => haystack.includes(term))
+  ));
 }
 
 function sortedByName(list) {
