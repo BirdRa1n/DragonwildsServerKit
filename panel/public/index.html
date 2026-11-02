@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dragonwilds Server Kit</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Bona+Nova+SC:wght@400;700&display=swap">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <canvas id="embers" class="embers" aria-hidden="true"></canvas>
+
+  <main id="login" class="login" hidden>
+    <div class="login-art" aria-hidden="true"></div>
+    <form id="login-form" class="login-card">
+      <div class="login-sigil" aria-hidden="true"></div>
+      <img class="login-logo" src="data/ui/logo.webp" alt="RuneScape: Dragonwilds">
+      <p class="login-subtitle" data-i18n="login.subtitle"></p>
+      <img class="login-flourish" src="data/ui/flourish-top.webp" alt="" aria-hidden="true">
+      <label><span data-i18n="login.user"></span> <input id="login-user" autocomplete="username" required value="admin"></label>
+      <label><span data-i18n="login.password"></span> <input id="login-pass" type="password" autocomplete="current-password" required autofocus></label>
+      <p id="login-error" class="error" role="alert"></p>
+      <button class="primary" type="submit" data-i18n="login.submit"></button>
+      <select class="lang-select" data-lang data-i18n-aria-label="lang.label"></select>
+    </form>
+  </main>
+
+  <div id="app" class="app" hidden>
+    <header class="top">
+      <img class="brand" src="data/ui/logo.webp" alt="RuneScape: Dragonwilds">
+      <div class="chips" role="status">
+        <span id="chip-server" class="chip"><i class="dot"></i><span></span></span>
+        <span id="chip-players" class="chip" data-i18n-title="top.playersTitle"></span>
+        <span id="chip-fps" class="chip" data-i18n-title="top.fpsTitle"></span>
+      </div>
+      <select class="lang-select" data-lang data-i18n-aria-label="lang.label"></select>
+      <button id="logout" class="ghost" data-i18n="top.logout"></button>
+    </header>
+
+    <nav class="tabs" role="tablist" data-i18n-aria-label="tab.aria">
+      <button role="tab" data-tab="map" aria-selected="true"><span class="tab-glyph">✦</span><span data-i18n="tab.map"></span></button>
+      <button role="tab" data-tab="items" aria-selected="false"><span class="tab-glyph">❖</span><span data-i18n="tab.items"></span></button>
+      <button role="tab" data-tab="enemies" aria-selected="false"><span class="tab-glyph">☠</span><span data-i18n="tab.enemies"></span></button>
+      <button role="tab" data-tab="rules" aria-selected="false"><span class="tab-glyph">⚖</span><span data-i18n="tab.rules"></span></button>
+      <button role="tab" data-tab="bans" aria-selected="false"><span class="tab-glyph">⚔</span><span data-i18n="tab.bans"></span></button>
+      <button role="tab" data-tab="log" aria-selected="false"><span class="tab-glyph">✎</span><span data-i18n="tab.log"></span></button>
+    </nav>
+
+    <section id="tab-map" class="tab map-layout">
+      <div class="map-frame">
+        <div class="map-wrap">
+          <canvas id="map" data-i18n-aria-label="map.aria"></canvas>
+          <div id="map-info" class="map-info"></div>
+          <div class="map-tools">
+            <button id="tp-mode" class="ghost" aria-pressed="false" data-i18n="map.tpMode" data-i18n-title="map.tpModeTitle"></button>
+            <button id="zoom-in" class="ghost icon" data-i18n-aria-label="map.zoomIn">+</button>
+            <button id="zoom-out" class="ghost icon" data-i18n-aria-label="map.zoomOut">−</button>
+            <button id="zoom-fit" class="ghost" data-i18n="map.fit"></button>
+          </div>
+          <div id="tp-hint" class="tp-hint" hidden data-i18n="map.tpHint"></div>
+          <div id="map-menu" class="map-menu" hidden></div>
+        </div>
+      </div>
+      <aside class="side">
+        <div id="solo-banner" class="solo-banner" hidden></div>
+        <h2 class="side-title"><span data-i18n="side.title"></span> <span id="player-count" class="muted"></span></h2>
+        <ul id="players" class="players"></ul>
+        <div id="detail" class="detail" hidden></div>
+      </aside>
+    </section>
+
+    <section id="tab-items" class="tab page wide" hidden>
+      <header class="page-head">
+        <h2 data-i18n="items.title"></h2>
+        <p class="muted" data-i18n="items.help"></p>
+      </header>
+      <div class="toolbar">
+        <label class="target"><span data-i18n="items.target"></span> <select id="item-target" class="target-select" data-i18n-aria-label="items.targetAria"></select></label>
+        <label class="qty"><span data-i18n="common.quantity"></span> <input id="item-count" type="number" min="1" max="100000" value="1"></label>
+        <input id="item-search" type="search" data-i18n-placeholder="items.search" data-i18n-aria-label="items.search">
+      </div>
+      <div id="item-cats" class="cats" role="group" data-i18n-aria-label="items.catsAria"></div>
+      <div id="item-grid" class="item-grid"></div>
+      <p id="item-empty" class="empty" hidden data-i18n="items.empty"></p>
+    </section>
+
+    <section id="tab-enemies" class="tab page wide" hidden>
+      <header class="page-head">
+        <h2 data-i18n="enemies.title"></h2>
+        <p class="muted" data-i18n="enemies.help"></p>
+      </header>
+      <div class="toolbar">
+        <label class="target"><span data-i18n="enemies.target"></span> <select id="enemy-target" class="target-select" data-i18n-aria-label="enemies.targetAria"></select></label>
+        <label class="qty"><span data-i18n="common.quantity"></span> <input id="enemy-count" type="number" min="1" max="20" value="1"></label>
+        <label class="qty"><span data-i18n="enemies.level"></span> <input id="enemy-level" type="number" min="1" max="200" value="1"></label>
+        <input id="enemy-search" type="search" data-i18n-placeholder="enemies.search" data-i18n-aria-label="enemies.search">
+      </div>
+      <div id="enemy-cats" class="cats" role="group" data-i18n-aria-label="enemies.catsAria"></div>
+      <div id="enemy-grid" class="enemy-grid"></div>
+      <p id="enemy-empty" class="empty" hidden data-i18n="enemies.empty"></p>
+    </section>
+
+    <section id="tab-rules" class="tab page" hidden>
+      <header class="page-head">
+        <h2 data-i18n="rules.title"></h2>
+        <p class="muted" data-i18n="rules.help"></p>
+      </header>
+      <form id="solo-form" class="form card">
+        <label class="check"><input id="solo-enabled" type="checkbox"> <span data-i18n="rules.enable"></span></label>
+        <label><span data-i18n="rules.limit"></span> <input id="solo-limit" type="number" min="1" required></label>
+        <label><span data-i18n="rules.warn"></span> <input id="solo-warn" required></label>
+        <h3 class="form-title" data-i18n="rules.messagesTitle"></h3>
+        <p class="muted form-note" data-i18n="rules.messagesHelp"></p>
+        <label><span data-i18n="rules.warnText"></span> <input id="solo-warn-text" maxlength="200"></label>
+        <label><span data-i18n="rules.kickReason"></span> <input id="solo-reason" maxlength="200"></label>
+        <label><span data-i18n="rules.kickMessage"></span> <input id="kick-message" maxlength="200"></label>
+        <label><span data-i18n="rules.banMessage"></span> <input id="ban-message" maxlength="200"></label>
+        <div class="row"><button class="primary" type="submit" data-i18n="rules.save"></button> <span id="solo-saved" class="muted" role="status"></span></div>
+      </form>
+      <h3 class="section" data-i18n="rules.knownTitle"></h3>
+      <p class="muted" data-i18n="rules.knownHelp"></p>
+      <div class="table-wrap card">
+        <table class="table">
+          <thead><tr><th data-i18n="rules.colPlayer"></th><th data-i18n="rules.colSeen"></th><th data-i18n="rules.colAlone"></th><th data-i18n="rules.colExempt"></th><th></th></tr></thead>
+          <tbody id="known"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="tab-bans" class="tab page" hidden>
+      <header class="page-head">
+        <h2 data-i18n="bans.title"></h2>
+        <p class="muted" data-i18n="bans.help"></p>
+      </header>
+      <div class="table-wrap card">
+        <table class="table">
+          <thead><tr><th data-i18n="rules.colPlayer"></th><th data-i18n="bans.colReason"></th><th data-i18n="bans.colWhen"></th><th></th></tr></thead>
+          <tbody id="bans"></tbody>
+        </table>
+      </div>
+      <h3 class="section" data-i18n="bans.formTitle"></h3>
+      <form id="ban-form" class="form card">
+        <label><span data-i18n="rules.colPlayer"></span> <select id="ban-player" required></select></label>
+        <label><span data-i18n="bans.reason"></span> <input id="ban-reason" maxlength="200"></label>
+        <div class="row"><button class="danger" type="submit" data-i18n="bans.submit"></button></div>
+      </form>
+    </section>
+
+    <section id="tab-log" class="tab page" hidden>
+      <header class="page-head"><h2 data-i18n="log.title"></h2></header>
+      <ol id="log" class="log card"></ol>
+    </section>
+  </div>
+
+  <div id="toast" class="toast" role="alert" hidden></div>
+  <canvas id="fx" class="fx" aria-hidden="true"></canvas>
+  <script src="i18n.js"></script>
+  <script src="fx.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
