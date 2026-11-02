@@ -1,5 +1,5 @@
 'use strict';
-// Interface languages. Item and creature names come from the game's data and stay as the game has them.
+// Interface languages. Item, creature and skill names come from the game's own translations (data/names.json).
 
 const I18N = (() => {
   const LOCALES = { en: 'en-US', 'pt-BR': 'pt-BR', es: 'es-ES' };

@@ -9,11 +9,16 @@ const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '
 const { t } = I18N;
 const fmt = (n) => Math.round(n).toLocaleString(I18N.locale);
 const when = (ms) => new Date(ms).toLocaleString(I18N.locale);
+/** A catalog entry's name in the panel's language: the game's own translation when it has one. */
+const nameOf = (entry) => (names[I18N.lang] && names[I18N.lang][entry.id]) || (names.en && names.en[entry.id]) || entry.name;
+/** Same, for an asset id that arrives in a log entry. */
+const nameOfId = (id, fallback) => (names[I18N.lang] && names[I18N.lang][id]) || (names.en && names.en[id]) || fallback;
 const minutes = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
 
 let state = { online: false, players: [], solo: {} };
 let settings = { solo: {}, exempt: [], bans: [], known: [] };
 let catalog = { items: [], enemies: [], skills: [] };
+let names = {};
 let selectedId = null;
 let es = null;
 const logEntries = [];
@@ -86,6 +91,8 @@ async function start() {
     const res = await fetch('data/catalog.json');
     if (res.ok) catalog = await res.json();
     catalog.items = catalog.items.filter((i) => i.group !== 'Deprecated');
+    const namesRes = await fetch('data/names.json');
+    if (namesRes.ok) names = await namesRes.json();
     buildCatalogPages();
     renderDetail(true);
   }
@@ -202,8 +209,8 @@ const PERKS = ['health', 'stamina', 'hunger', 'thirst', 'endurance', 'cooldown']
 const form = { skill: '', xp: 1000, tx: '', ty: '', tz: '' };
 
 function skillGrid() {
-  return catalog.skills.map((s) => `<button type="button" class="skill" data-skill="${esc(s.id)}" aria-pressed="${s.id === form.skill}" title="${esc(s.name)}">
-    <img src="data/icons/skills/${esc(s.id)}.webp" alt="" loading="lazy"><span>${esc(s.name)}</span></button>`).join('');
+  return catalog.skills.map((s) => `<button type="button" class="skill" data-skill="${esc(s.id)}" aria-pressed="${s.id === form.skill}" title="${esc(nameOf(s))}">
+    <img src="data/icons/skills/${esc(s.id)}.webp" alt="" loading="lazy"><span>${esc(nameOf(s))}</span></button>`).join('');
 }
 
 function renderDetail(rebuild) {
@@ -398,26 +405,30 @@ const filters = {
 
 function matches(entry, query) {
   const q = query.trim().toLowerCase();
-  return !q || entry.name.toLowerCase().includes(q) || entry.id.toLowerCase().includes(q);
+  return !q || nameOf(entry).toLowerCase().includes(q) || entry.name.toLowerCase().includes(q) || entry.id.toLowerCase().includes(q);
+}
+
+function sortedByName(list) {
+  return list.map((entry) => [nameOf(entry), entry]).sort((a, b) => a[0].localeCompare(b[0], I18N.locale)).map((pair) => pair[1]);
 }
 
 function renderItems() {
   const test = ITEM_CATS[filters.item.cat][1];
-  const list = catalog.items.filter((i) => test(i) && matches(i, filters.item.query));
-  $('item-grid').innerHTML = list.map((i) => `<button type="button" class="item" data-item="${esc(i.path)}" title="${esc(i.name)}">
+  const list = sortedByName(catalog.items.filter((i) => test(i) && matches(i, filters.item.query)));
+  $('item-grid').innerHTML = list.map((i) => `<button type="button" class="item" data-item="${esc(i.path)}" title="${esc(nameOf(i))}">
     <span class="item-slot"><img src="data/icons/items/${esc(i.id)}.webp" alt="" loading="lazy" onerror="this.style.visibility='hidden'"></span>
-    <span class="item-name">${esc(i.name)}</span></button>`).join('');
+    <span class="item-name">${esc(nameOf(i))}</span></button>`).join('');
   $('item-empty').hidden = list.length > 0;
 }
 
 function renderEnemies() {
   const test = ENEMY_CATS[filters.enemy.cat][1];
-  const list = catalog.enemies.filter((e) => test(e) && matches(e, filters.enemy.query));
+  const list = sortedByName(catalog.enemies.filter((e) => test(e) && matches(e, filters.enemy.query)));
   $('enemy-grid').innerHTML = list.map((e) => {
     const boss = BOSS.test(e.id);
-    return `<button type="button" class="enemy ${boss ? 'danger-boss' : ''}" data-enemy="${esc(e.path)}" title="${esc(t('enemies.summonTitle', { name: e.name }))}">
+    return `<button type="button" class="enemy ${boss ? 'danger-boss' : ''}" data-enemy="${esc(e.path)}" title="${esc(t('enemies.summonTitle', { name: nameOf(e) }))}">
       <span class="crest"><img src="data/icons/enemies/${esc(e.id)}.webp" alt="" loading="lazy"></span>
-      <span class="enemy-name">${esc(e.name)}</span>
+      <span class="enemy-name">${esc(nameOf(e))}</span>
       <span class="enemy-kind">${esc(t(boss ? 'ekind.boss' : ANIMAL.test(e.id) ? 'ekind.animal' : 'ekind.monster'))}</span>
     </button>`;
   }).join('');
@@ -800,6 +811,9 @@ $('ban-form').addEventListener('submit', (e) => {
 function logText(e) {
   const params = { ...(e.params || {}) };
   if (params.perk) params.perk = t(`perk.${params.perk}`);
+  if (params.item) params.item = nameOfId(params.item, params.item);
+  if (params.enemy) params.enemy = nameOfId(`${params.enemy}`, params.enemy);
+  if (params.skill) params.skill = nameOfId(`SKILL_${params.skill}`, params.skill);
   if (e.err) params.err = errorText(e.err);
   return t(`l.${e.key}`, params);
 }
