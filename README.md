@@ -23,8 +23,8 @@ your server, all from a browser. The panel speaks English, Portuguese (Brazil) a
 - Grant XP for any skill
 
 **Items and creatures**
-- Over 700 items with their in-game icons, with search and categories
-- Over 50 creatures to summon near a player, at any level
+- Over 1,200 items with their in-game icons and names, including the expansions, with search and categories
+- Nearly 200 creatures to summon near a player, at any level
 
 **Rules**
 - Limit how long someone can play alone, so friends do not get ahead of the group. Time alone is a budget:

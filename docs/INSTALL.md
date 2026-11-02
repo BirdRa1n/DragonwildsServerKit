@@ -191,7 +191,13 @@ around 3 minutes.
 runuser -u dragonwilds -- node /opt/dragonwilds-kit/gen-catalog.js /opt/dragonwilds-kit/kit.sock /opt/dragonwilds-server/Manifest_UFSFiles_Linux.txt /opt/dragonwilds-kit/catalog.json
 ```
 
-It finishes with a line like `items=724/1008 enemies=58 skills=15`.
+It finishes with a line showing how many items, creatures and skills it found.
+
+If people are playing, you can complete an existing catalog from the game client instead, without loading anything into the server. Its names, icons and categories are slightly less exact:
+
+```bash
+python -I tools/extend_catalog.py "C:/Games/RuneScape Dragonwilds/RSDragonwilds/Content/Paks/RSDragonwilds-Windows" panel/public/data/catalog.json
+```
 
 Download the catalog to your computer, where the next step needs it:
 
@@ -222,8 +228,8 @@ python -I tools/extract_assets.py "C:/Games/RuneScape Dragonwilds/RSDragonwilds/
 Steam usually installs the game under `steamapps/common`. It takes about a minute, and ends with:
 
 ```
-icons: 736 written, 2 failed
-emblems: 58
+icons: 1230 written, 2 failed
+emblems: 196
 ui art: 15
 map written
 ```
