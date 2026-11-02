@@ -374,8 +374,24 @@ async function api(req, res, url) {
   throw new ApiError(404, 'not_found');
 }
 
+/**
+ * Proxies such as Cloudflare can tell browsers to keep scripts for hours, whatever this server says.
+ * Each script and stylesheet is linked with its file's modification time, so an update always reaches them.
+ */
+function versionedIndex() {
+  const html = fs.readFileSync(path.join(ROOT, 'public/index.html'), 'utf8');
+  return html.replace(/(src|href)="([\w-]+\.(?:js|css))"/g, (match, attr, file) => {
+    const version = Math.round(fs.statSync(path.join(ROOT, 'public', file)).mtimeMs);
+    return `${attr}="${file}?v=${version}"`;
+  });
+}
+
 function serveStatic(req, res, url) {
   const rel = url.pathname === '/' ? 'index.html' : decodeURIComponent(url.pathname.slice(1));
+  if (rel === 'index.html') {
+    res.writeHead(200, { 'Content-Type': MIME['.html'], 'Cache-Control': 'no-cache', 'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY' });
+    return res.end(versionedIndex());
+  }
   const file = path.normalize(path.join(ROOT, 'public', rel));
   if (!file.startsWith(path.join(ROOT, 'public') + path.sep)) {
     res.writeHead(403);
